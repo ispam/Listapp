@@ -42,7 +42,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void deleteItem(String item){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(DB_TABLE, DB_COLUMN + " - ?", new String[]{item});
+        db.delete(DB_TABLE, DB_COLUMN + " = ?", new String[]{ item });
         db.close();
     }
 

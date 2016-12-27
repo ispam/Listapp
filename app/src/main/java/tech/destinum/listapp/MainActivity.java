@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -102,10 +103,11 @@ public class MainActivity extends AppCompatActivity {
             case R.id.logout:
                 mAuth.signOut();
                 LoginManager.getInstance().logOut();
+                break;
             case R.id.addNewItem:
-
                 final EditText itemEditText = new EditText(this);
-                AlertDialog alertDialog = new AlertDialog(this).setTitle("Add New Item").setMessagege("Want to add a new item?")
+                AlertDialog alertDialog = new AlertDialog.Builder(this)
+                        .setTitle("Add New Item")
                         .setView(itemEditText)
                         .setPositiveButton("Add", new DialogInterface.OnClickListener(){
 
@@ -119,11 +121,19 @@ public class MainActivity extends AppCompatActivity {
                         .setNegativeButton("Cancel", null)
                         .create();
                 alertDialog.show();
-                return true;
+                break;
         }
 
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void deleteItem(View view){
+        View parent = (View) view.getParent();
+        TextView itemTextView = (TextView) findViewById(R.id.item_name);
+        String item = String.valueOf(itemTextView.getText());
+        mDBHelper.deleteItem(item);
+        loadItemList();
     }
 
     @Override
