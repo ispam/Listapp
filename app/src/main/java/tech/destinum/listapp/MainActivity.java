@@ -1,7 +1,9 @@
 package tech.destinum.listapp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,6 +11,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
@@ -16,11 +21,16 @@ import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private TextView mName;
+    private DBHelper mDBHelper;
+    private ArrayAdapter<String> mAdapter;
+    private ListView mListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +38,14 @@ public class MainActivity extends AppCompatActivity {
         this.requestWindowFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_main);
 
+        mDBHelper = new DBHelper(this);
         mAuth = FirebaseAuth.getInstance();
+
         mName = (TextView) findViewById(R.id.tvName);
+        mListView = (ListView) findViewById(R.id.list);
+
+        loadItemList();
+
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user !=null){
             String name = user.getDisplayName();
@@ -53,6 +69,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void loadItemList() {
+        ArrayList<String> itemList = mDBHelper.getItemList();
+        if (mAdapter==null){
+            mAdapter = new ArrayAdapter<String>(this, R.layout.row, R.id.item_name, itemList);
+            mListView.setAdapter(mAdapter);
+        } else {
+            mAdapter.clear();
+            mAdapter.addAll(itemList);
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
     public void goAuthenticate(){
         Intent mLogin = new Intent(MainActivity.this, Authentication.class);
         mLogin.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -70,10 +98,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.logout){
-            mAuth.signOut();
-            LoginManager.getInstance().logOut();
+        switch (item.getItemId()){
+            case R.id.logout:
+                mAuth.signOut();
+                LoginManager.getInstance().logOut();
+            case R.id.addNewItem:
+
+                final EditText itemEditText = new EditText(this);
+                AlertDialog alertDialog = new AlertDialog(this).setTitle("Add New Item").setMessagege("Want to add a new item?")
+                        .setView(itemEditText)
+                        .setPositiveButton("Add", new DialogInterface.OnClickListener(){
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String item = String.valueOf(itemEditText.getText());
+                                mDBHelper.insertNewItem(item);
+                                loadItemList();
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .create();
+                alertDialog.show();
+                return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }

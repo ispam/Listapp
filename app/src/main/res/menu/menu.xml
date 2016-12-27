@@ -4,4 +4,10 @@
 
     <item android:title="Logout"
         android:id="@+id/logout"/>
+
+    <item android:id="@+id/addNewItem"
+          android:title="AddNewItem"
+          app:showAsAction="always"
+          android:icon="@android:drawable/ic_input_add"
+        />
 </menu>
