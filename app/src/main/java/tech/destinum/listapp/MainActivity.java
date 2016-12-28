@@ -3,7 +3,10 @@ package tech.destinum.listapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView mListView;
     private Button mButton;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,16 +59,15 @@ public class MainActivity extends AppCompatActivity {
         mDBHelper = new DBHelper(this);
         mAuth = FirebaseAuth.getInstance();
 
-        mName = (TextView) findViewById(R.id.tvName);
         mListView = (ListView) findViewById(R.id.list);
         mButton = (Button) findViewById(R.id.buttonQR);
 
         loadItemList();
-        final ArrayList<String> itemList = mDBHelper.getItemList();
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ArrayList<String> itemList = mDBHelper.getItemList();
                 MultiFormatWriter multiFW = new MultiFormatWriter();
                 try {
                     BitMatrix bitMatrix = multiFW.encode(String.valueOf(itemList), BarcodeFormat.QR_CODE, 200, 200);
@@ -80,12 +83,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user !=null){
-            String name = user.getDisplayName();
-            mName.setText(name);
-        }
-
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -100,32 +97,6 @@ public class MainActivity extends AppCompatActivity {
 //        if (AccessToken.getCurrentAccessToken() == null){
 //            goAuthenticate();
 //        }
-
-
-        ListUtils.setDynamicHeight(mListView);
-
-
-    }
-
-    public static class ListUtils {
-        public static void setDynamicHeight(ListView mListView) {
-            ListAdapter mListAdapter = mListView.getAdapter();
-            if (mListAdapter == null) {
-                // when adapter is null
-                return;
-            }
-            int height = 0;
-            int desiredWidth = MeasureSpec.makeMeasureSpec(mListView.getWidth(), MeasureSpec.UNSPECIFIED);
-            for (int i = 0; i < mListAdapter.getCount(); i++) {
-                View listItem = mListAdapter.getView(i, null, mListView);
-                listItem.measure(desiredWidth, MeasureSpec.UNSPECIFIED);
-                height += listItem.getMeasuredHeight();
-            }
-            ViewGroup.LayoutParams params = mListView.getLayoutParams();
-            params.height = height + (mListView.getDividerHeight() * (mListAdapter.getCount() - 1));
-            mListView.setLayoutParams(params);
-            mListView.requestLayout();
-        }
     }
 
     private void loadItemList() {
@@ -187,11 +158,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void deleteItem(View view){
-        View parent = (View) view.getParent();
         TextView itemTextView = (TextView) findViewById(R.id.item_name);
         String item = String.valueOf(itemTextView.getText());
         mDBHelper.deleteItem(item);
         loadItemList();
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override

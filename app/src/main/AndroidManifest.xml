@@ -33,7 +33,8 @@
         <activity android:name=".Register">
         </activity>
         <activity android:name=".QR"
-            android:theme="@style/Theme.AppCompat.Light">
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName=".MainActivity">
         </activity>
     </application>
 
