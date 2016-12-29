@@ -26,6 +26,7 @@ import android.widget.ListAdapter;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
@@ -143,8 +144,13 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 String item = String.valueOf(itemEditText.getText());
-                                mDBHelper.insertNewItem(item);
-                                loadItemList();
+                                if(item.length() <= 0|| item.equals("")){
+                                    Toast.makeText(MainActivity.this, "Item Cant Be Blank",
+                                            Toast.LENGTH_LONG).show();
+                                } else {
+                                    mDBHelper.insertNewItem(item);
+                                    loadItemList();
+                                }
                             }
                         })
                         .setNegativeButton("Cancel", null)
