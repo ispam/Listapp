@@ -77,7 +77,7 @@ public class QR extends AppCompatActivity {
 
                 if (contentUri != null) {
                     Intent share = new Intent(Intent.ACTION_SEND);
-                    share.setPackage("com.whatsapp");
+//                    share.setPackage("com.whatsapp");
 //                    share.setType("image/*");
                     share.setDataAndType(contentUri, getContentResolver().getType(contentUri));
                     share.putExtra(Intent.EXTRA_STREAM, contentUri);
