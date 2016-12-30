@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,7 +18,13 @@ import android.widget.ImageView;
 import com.facebook.login.LoginManager;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+
+import static android.R.attr.bitmap;
 
 public class QR extends AppCompatActivity {
 
@@ -34,6 +41,21 @@ public class QR extends AppCompatActivity {
         mImageView.setImageBitmap(mBitmap);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        try {
+
+            File cachePath = new File(getCacheDir(), "images");
+            cachePath.mkdirs(); // don't forget to make the directory
+            FileOutputStream stream = new FileOutputStream(cachePath + "/image.png"); // overwrites this image every time
+            mBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            stream.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -48,18 +70,20 @@ public class QR extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.share_options:
-                mBitmap = getIntent().getParcelableExtra("qrcode");
 
-                String path = MediaStore.Images.Media.insertImage(getContentResolver(),
-                        mBitmap, "Design", null);
+                File imagePath = new File(getCacheDir(), "images");
+                File newFile = new File(imagePath, "image.png");
+                Uri contentUri = FileProvider.getUriForFile(this, "tech.destinum.listapp.fileprovider", newFile);
 
-                Uri uri = Uri.parse(path);
-                Intent share = new Intent(Intent.ACTION_SEND);
-                share.setPackage("com.whatsapp");
-                share.setType("image/*");
-                share.putExtra(Intent.EXTRA_STREAM, uri);
-                share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(Intent.createChooser(share, "Share QR Code"));
+                if (contentUri != null) {
+                    Intent share = new Intent(Intent.ACTION_SEND);
+                    share.setPackage("com.whatsapp");
+//                    share.setType("image/*");
+                    share.setDataAndType(contentUri, getContentResolver().getType(contentUri));
+                    share.putExtra(Intent.EXTRA_STREAM, contentUri);
+                    share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(Intent.createChooser(share, "Share QR Code"));
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);
