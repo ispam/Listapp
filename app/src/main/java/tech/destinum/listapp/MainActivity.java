@@ -2,6 +2,7 @@ package tech.destinum.listapp;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -44,12 +45,10 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private TextView mName;
     private DBHelper mDBHelper;
-    private ArrayAdapter<String> mAdapter;
+    private ItemAdapter mAdapter;
     private ListView mListView;
     private Button mButton;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +62,11 @@ public class MainActivity extends AppCompatActivity {
         mListView = (ListView) findViewById(R.id.list);
         mButton = (Button) findViewById(R.id.buttonQR);
 
-        loadItemList();
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<String> itemList = mDBHelper.getItemList();
+                ArrayList<ItemClass> itemList = mDBHelper.getItemList();
                 MultiFormatWriter multiFW = new MultiFormatWriter();
                 try {
                     BitMatrix bitMatrix = multiFW.encode(String.valueOf(itemList), BarcodeFormat.QR_CODE, 200, 200);
@@ -84,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -95,21 +92,15 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-//        if (AccessToken.getCurrentAccessToken() == null){
-//            goAuthenticate();
-//        }
+
+        loadItemList();
     }
 
+    //only needed once rest of the time it is getting managed inside the ItemAdapter
     private void loadItemList() {
-        ArrayList<String> itemList = mDBHelper.getItemList();
-        if (mAdapter==null){
-            mAdapter = new ArrayAdapter<String>(this, R.layout.row, R.id.item_name, itemList);
-            mListView.setAdapter(mAdapter);
-        } else {
-            mAdapter.clear();
-            mAdapter.addAll(itemList);
-            mAdapter.notifyDataSetChanged();
-        }
+        ArrayList<ItemClass> itemList = mDBHelper.getItemList();
+        mAdapter = new ItemAdapter(MainActivity.this, mDBHelper, itemList);
+        mListView.setAdapter(mAdapter);
     }
 
     public void goAuthenticate(){
@@ -163,13 +154,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void deleteItem(View view){
-        TextView itemTextView = (TextView) findViewById(R.id.item_name);
-        String item = String.valueOf(itemTextView.getText());
-        mDBHelper.deleteItem(item);
-        loadItemList();
-        mAdapter.notifyDataSetChanged();
-    }
 
     @Override
     public void onStart() {
@@ -184,5 +168,4 @@ public class MainActivity extends AppCompatActivity {
             mAuth.removeAuthStateListener(mAuthListener);
         }
     }
-
 }

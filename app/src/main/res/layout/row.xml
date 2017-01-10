@@ -20,7 +20,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:text="DELETE"
-        android:onClick="deleteItem"
+        android:onClick="deleteItemH"
         android:layout_centerVertical="true"/>
 
 </RelativeLayout>

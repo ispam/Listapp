@@ -21,7 +21,6 @@
         android:clipChildren="false"
         android:layout_weight="1"/>
 
-
     <RelativeLayout
         android:id="@+id/footer"
         android:layout_width="match_parent"
@@ -29,11 +28,13 @@
         android:layout_alignParentBottom="true"
         android:gravity="center">
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/buttonQR"
-                android:text="Generate"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonQR"
+            android:text="Generate"/>
+
+
     </RelativeLayout>
 
 </LinearLayout>
